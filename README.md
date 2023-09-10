@@ -1,6 +1,6 @@
 Course material for **Topics in cluster analysis**
-(as part of the course **Advanced Analytics for Data Science**)
-Blended Intensive Programme (BIP), September 5-15, October 2 and 20, 2023 – Naples
+(as part of the Blended Intensive Programme (BIP) **Advanced Analytics for Data Science**)
+September 5-15, October 2 and 20, 2023 – Naples
 
 § Name of instructor
 **Angelos Markos**, Democritus University of Thrace, Greece.
@@ -22,13 +22,13 @@ applications, empowering students to make data-driven decisions.
 
 § Introductory background
 
-Everitt, B. S., Landau, S., Leese, M., & Stahl, D. (2011). Cluster analysis. John Wiley & Sons.
+Everitt, B. S., Landau, S., Leese, M., & Stahl, D. (2011). *Cluster analysis*. John Wiley & Sons.
 
-Kaufman, L., & Rousseeuw, P. J. (2009). Finding groups in data: an introduction to cluster
-analysis. John Wiley & Sons.
+Kaufman, L., & Rousseeuw, P. J. (2009). *Finding groups in data: an introduction to cluster
+analysis*. John Wiley & Sons.
 
-Leisch, F., Dolnicar, S., & Grün, B. (2018). Market segmentation analysis: Understanding it,
-doing it, and making it useful. Springer.
+Leisch, F., Dolnicar, S., & Grün, B. (2018). *Market segmentation analysis: Understanding it,
+doing it, and making it useful*. Springer.
 
 § Facilities Required
 - Software: R/Rstudio
