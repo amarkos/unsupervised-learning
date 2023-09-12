@@ -305,34 +305,84 @@ df_numeric <- df_numeric |>
 airbnb_data <- cbind(df_numeric, df_factor)
 ```
 
+Calculate average nightly price per guest per neighborhood
+
+```{r leaf}
+library(geojsonio)
+library(leaflet)
+
+nb_geo <- geojson_read('http://data.insideairbnb.com/italy/campania/naples/2023-06-21/visualisations/neighbourhoods.geojson', what = 'sp')
+
+nb_geo@data$neighbourhood = as.factor(nb_geo@data$neighbourhood)
+
+night_neighbourhood <- airbnb_data %>% group_by(neighbourhood_cleansed) %>% summarize(avg_night_price = mean(price_per_guest)) %>% arrange(desc(avg_night_price))
+
+ggplot(night_neighbourhood[1:10, ], aes(x = reorder(neighbourhood_cleansed, avg_night_price),  y = avg_night_price, 
+                                        fill = avg_night_price)) + 
+  geom_bar(stat = "identity") + ggtitle("Top 10 most expensive neighbourhoods") + 
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        axis.title = element_text(hjust = 0.5, size = 12),
+        axis.text = element_text(size = 12)) + scale_y_continuous(labels = function(x) paste0("$", x)) +
+  xlab("") + ylab("Airbnb Price per Night") + coord_flip() + theme(legend.position = "none") + scale_fill_gradient(low = "yellow", high = "red")
+
+colnames(night_neighbourhood)[1] <- "neighbourhood"
+nb_geo@data <- left_join(nb_geo@data, night_neighbourhood[, 1:2]) %>% as.data.frame()
+
+for(i in 1:nrow(nb_geo@data)){
+  if(is.na(nb_geo@data[i, "avg_night_price"]) == TRUE){
+    nb_geo@data[i, 3] <- mean(nb_geo@data[complete.cases(nb_geo@data), 3])
+  } else if(is.na(nb_geo@data[i, "avg_night_price"]) == FALSE){
+  }
+}
+
+
+pal <- colorNumeric(
+  palette = "YlGnBu",
+  domain = nb_geo@data$avg_night_price
+)
+
+price_per_neighbourhood <- leaflet(nb_geo) %>%
+  addTiles() %>% setView(lng = 14.305573, lat = 40.853294, zoom = 10.5) %>%
+  addPolygons(stroke = TRUE, fillColor = ~ pal(avg_night_price), fillOpacity = 0.8,
+              highlight = highlightOptions(weight = 2,
+                                           color = ~ pal(avg_night_price), 
+                                           fillOpacity = 1,
+                                           bringToFront = TRUE),
+              label = ~neighbourhood,
+              smoothFactor = 0.2,
+              popup = ~ paste(paste(neighbourhood,":"), "<br/>","<b/>", paste("Avg Night Price: ", "$", round(avg_night_price)))) %>%
+  addLegend("bottomright", pal = pal, values = ~avg_night_price, opacity = 1.0, 
+            title = "Average Airbnb Night Price",
+            labFormat = labelFormat(prefix = "$"), na.label="")
+price_per_neighbourhood
+```
+
 # Clustering
 
 Calculate Gower distance and apply PAM (2 to 10 clusters, returns cluster with best criterion value)
 
-```{r gowerpam}
+```{r gowerpam, results='hide'}
 
 library(cluster)
 library(fpc)
 gower_dist <- daisy(airbnb_data, metric = "gower")
 
 pam_fit <- pamk(gower_dist, krange = 2:10, criterion = "ch")
-pam_fit$pamobject$clustering
-pam_fit
 ```
 
 Apply K-Prototypes (2 to 6 clusters, 20 reps)
 
-```{r kproto}
+```{r kproto, results='hide'}
 library(clustMixType)
 
-kpres2 <- kproto(cbind(df_numeric, df_factor), 2, nstart = 1)
-kpres3 <- kproto(cbind(df_numeric, df_factor), 3, nstart = 1)
-kpres4 <- kproto(cbind(df_numeric, df_factor), 4, nstart = 1)
-kpres5 <- kproto(cbind(df_numeric, df_factor), 5, nstart = 1)
-kpres6 <- kproto(cbind(df_numeric, df_factor), 6, nstart = 1)
+kpres2 <- kproto(cbind(df_numeric, df_factor), 2, nstart = 1,verbose = FALSE)
+kpres3 <- kproto(cbind(df_numeric, df_factor), 3, nstart = 1,verbose = FALSE)
+kpres4 <- kproto(cbind(df_numeric, df_factor), 4, nstart = 1,verbose = FALSE)
+kpres5 <- kproto(cbind(df_numeric, df_factor), 5, nstart = 1,verbose = FALSE)
+kpres6 <- kproto(cbind(df_numeric, df_factor), 6, nstart = 1,verbose = FALSE)
 ```
 
-```{r clustersim}
+```{r clustersim, results='hide'}
 print(table(pam_fit$pamobject$clustering, kpres2$cluster))
 
 require(mclust)
@@ -341,18 +391,68 @@ adjustedRandIndex(pam_fit$pamobject$clustering, kpres2$cluster)
 
 Calculate Total Variation Distance and apply PAM (2 to 10 clusters, returns cluster with best criterion value)
 
-```{r TVD}
+```{r TVD, results='hide'}
 library(kmed)
 airbnb_dist <- distmix(airbnb_data, method = "ahmad", idnum = 1:32, idcat = 33:103)
 
 #run the sfkm algorihtm on airbnb_dist
-(simplekm <- skm(airbnb_dist, ncluster = 2, seeding = 50))
+(simplekm <- skm(airbnb_dist, ncluster = 3, seeding = 50))
 
 #calculate silhouette of the K-medoids result of airbnb data set 
-silairbnb <- sil(airbnb_dist, simplekm$medoid, simplekm$cluster, 
-                     title = "Silhouette plot of Airbnb data set via ")
+silairbnb <- sil(airbnb_dist, simplekm$medoid, simplekm$cluster, title = "Silhouette plot of Airbnb data set")
 
 barplotnum(df_numeric, simplekm$cluster, alpha = 0.05)
 
-adjustedRandIndex(simplekm$cluster, kpres2$cluster)
+adjustedRandIndex(simplekm$cluster, kpres3$cluster)
+```
+
+We use the leaflet package to display listings from the two groups using lat/long information. This will give us an idea of geographical distribution of the clusters.
+
+```{r dep}
+c1 <- cbind(df_numeric, df_factor) %>% 
+  filter(simplekm$cluster == 1)
+
+c2 <- cbind(df_numeric, df_factor) %>% 
+  filter(simplekm$cluster == 2) 
+
+c3 <- cbind(df_numeric, df_factor) %>% 
+  filter(simplekm$cluster == 3)
+
+library(leaflet)
+leaflet() %>% setView(lng = 14.305573, lat = 40.853294, zoom = 10) %>%
+  addTiles() %>%
+  addPolygons(data = nb_geo, color = "#444444", weight = 2, opacity = 1) %>%
+  addCircleMarkers(  lng = c1$longitude,
+                     lat = c1$latitude,
+                     radius = 2,
+                     stroke = FALSE,
+                     color = "blue",
+                     fillOpacity = 0.5,
+                     group = "c1"
+  ) %>%
+  addCircleMarkers(  lng = c2$longitude,
+                     lat = c2$latitude,
+                     radius = 3,
+                     stroke = FALSE,
+                     color = "green",
+                     fillOpacity = 0.5,
+                     group = "c2"
+  )%>%
+  addCircleMarkers(  lng = c3$longitude,
+                     lat = c3$latitude,
+                     radius = 3,
+                     stroke = FALSE,
+                     color = "red",
+                     fillOpacity = 0.5,
+                     group = "c3"
+  )
+```
+
+Describe the clusters
+
+```{r desc}
+library(FactoMineR)
+desc_clus <- catdes(cbind(airbnb_data,as.factor(simplekm$cluster)),136)
+desc_clus$quanti
+desc_clus$category
 ```
