@@ -32,7 +32,7 @@ introduction to cluster analysis. John Wiley & Sons.
 Leisch, F., Dolnicar, S., & Grün, B. (2018). Market segmentation
 analysis: Understanding it, doing it, and making it useful. Springer.
 
-§ Facilities Required
+## Facilities Required
 
 - Software: R/Rstudio
 - Course Material. All course materials, including the data and R scripts
