@@ -2369,38 +2369,6 @@ pam   1   2   3   4
 <img data-src="Airbnb_Naples_Slides_files/figure-revealjs/eeee-1.png" width="960" class="r-stretch"></section>
 <section class="slide level2">
 
-<!-- #### Airbnb listings: Data exploration -->
-<!--colnames(night_neighbourhood)[1] <- "neighbourhood"
-nb_geo@data <- left_join(nb_geo@data, night_neighbourhood[, 1:2]) %>% as.data.frame()
-<!-- ```{r myeee} -->
-<!-- for(i in 1:nrow(nb_geo@data)){ -->
-<!--   if(is.na(nb_geo@data[i, "avg_night_price"]) == TRUE){ -->
-<!--     nb_geo@data[i, 3] <- mean(nb_geo@data[complete.cases(nb_geo@data), 3]) -->
-<!--   } else if(is.na(nb_geo@data[i, "avg_night_price"]) == FALSE){ -->
-<!--   } -->
-<!-- } -->
-<!-- pal <- colorNumeric( -->
-<!--   palette = "YlGnBu", -->
-<!--   domain = nb_geo@data$avg_night_price -->
-<!-- ) -->
-<!-- price_per_neighbourhood <- leaflet(nb_geo) %>% -->
-<!--   addTiles() %>% setView(lng = 14.305573, lat = 40.853294, zoom = 11.5) %>% -->
-<!--   addPolygons(stroke = TRUE, fillColor = ~ pal(avg_night_price), fillOpacity = 0.8, -->
-<!--               highlight = highlightOptions(weight = 2, -->
-<!--                                            color = ~ pal(avg_night_price),  -->
-<!--                                            fillOpacity = 1, -->
-<!--                                            bringToFront = TRUE), -->
-<!--               label = ~neighbourhood, -->
-<!--               smoothFactor = 0.2, -->
-<!--               popup = ~ paste(paste(neighbourhood,":"), "<br/>","<b/>", paste("Avg Night Price: ", "$", round(avg_night_price)))) %>% -->
-<!--   addLegend("bottomright", pal = pal, values = ~avg_night_price, opacity = 1.0,  -->
-<!--             title = "Average Airbnb Night Price", -->
-<!--             labFormat = labelFormat(prefix = "$"), na.label="") -->
-<!-- price_per_neighbourhood -->
-<!-- ``` -->
-</section>
-<section class="slide level2">
-
 <h4 id="gowers-general-formula-for-dissimilarity">Gower’s general formula for dissimilarity</h4>
 <div style="font-size: 0.6em">
 <p>Gower’s general similarity measure is a composite measure that incorporates both categorical and continuous variables:</p>
