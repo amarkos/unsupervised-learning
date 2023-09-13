@@ -1,5 +1,5 @@
 # Topics in cluster analysis
-Follow the Slides online: (Slides)[http://www.amarkos.gr/courses/naplesBIP/]
+Follow the Slides online: [http://www.amarkos.gr/courses/naplesBIP/]
 
 ## Name of instructor
 Angelos Markos, Democritus University of Thrace, Greece.
